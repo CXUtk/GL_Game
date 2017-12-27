@@ -1,0 +1,35 @@
+1.dll下面文件放到window/System32和Syswow64下
+
+2.include放到vs的头文件库下 gl文件原封不动    每个版本的位置不同可以右键工程 属性 vc++目录包含目录 下拉编辑就会看到计算的值就是头文件库
+ 
+3.lib放到vs lib库下   位置同理  叫库目录
+
+4.使用库前加上这段程序  opengl头文件 什么的不要写在iostream  或是stdio和下面这段程序前面
+#pragma once
+#define GLUT_DISABLE_ATEXIT_HACK 
+#if _MSC_VER>=1900
+#include "stdio.h" 
+_ACRTIMP_ALT FILE* __cdecl __acrt_iob_func(unsigned);
+#ifdef __cplusplus 
+extern "C"
+#endif 
+FILE* __cdecl __iob_func(unsigned i) {
+	return __acrt_iob_func(i);
+}
+#endif /* _MSC_VER>=1900 */
+
+5.右键解决方案-》属性-》连接器-》输入-》附加依赖库-》编辑
+gltools.lib
+freeglut.lib
+glew32s.lib
+
+6.我目前发现的一些问题  mian里面要有
+GLenum err = glewInit();
+	if (GLEW_OK != err) {
+		fprintf(stderr, "GLEW Error: %s\n", glewGetErrorString(err));
+		return 1;
+	}
+网上下的蓝宝书源代码有错误  有的是图片放错位置 加载贴图会中断
+
+
+如果还有什么问题欢迎加qq1343742392讨论
