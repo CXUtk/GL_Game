@@ -28,6 +28,7 @@ public:
 	void setBool(const std::string & name, GLboolean value) const;
 	void setInt(const std::string & name, GLint value) const;
 	void setFloat(const std::string & name, GLfloat value) const;
+	void setVec3(const std::string & name, float x, float y, float z) const;
 
 private:
 	void load_shader(const std::string & vShaderCode, const std::string & fShaderCode);

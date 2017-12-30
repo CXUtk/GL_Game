@@ -21,7 +21,7 @@ std::string get_all_string(const std::string & path) {
 		result = fileSS.str();
 	}
 	catch (std::ifstream::failure e) {
-		std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ > " << path 
+		std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ " << path 
 			<< std::endl << e.what() << std::endl;
 	}
 
@@ -110,4 +110,9 @@ void Shader::setInt(const std::string & name, GLint value) const
 void Shader::setFloat(const std::string & name, GLfloat value) const
 {
 	glUniform1f(glGetUniformLocation(this->ID, name.c_str()), value);
+}
+
+void Shader::setVec3(const std::string & name, float x, float y, float z) const
+{
+	glUniform3f(glGetUniformLocation(this->ID, name.c_str()), x, y, z);
 }
