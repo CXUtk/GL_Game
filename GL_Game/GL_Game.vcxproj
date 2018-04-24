@@ -77,7 +77,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>DEBUG;_WIN32;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -118,15 +118,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AIMap.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Drawable.cpp" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="LifeMap.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="SpriteRenderer.cpp" />
     <ClCompile Include="Texture2D.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="Vector2D.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AIMap.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Drawable.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="LifeMap.h" />
+    <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="SpriteRenderer.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Texture2D.h" />
     <ClInclude Include="Utils.h" />

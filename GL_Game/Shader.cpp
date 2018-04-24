@@ -3,42 +3,72 @@
 /*
 	Load shader code from a file
 */
-std::string get_all_string(const std::string & path) {
-	std::string result;
-	std::ifstream file;
-	try {
-		// Open the file
-		file.open(path);
 
-		// Read the string
-		std::stringstream fileSS;
-		fileSS << file.rdbuf();
-
-		// Close file handle
-		file.close();
-
-		// Get the result string
-		result = fileSS.str();
+void check_compile_Error(GLuint object, GLboolean compile, const GLchar * name) {
+	static GLchar infoLog[512];
+	GLint success;
+	if (compile) {
+		glGetShaderiv(object, GL_COMPILE_STATUS, &success);
+		if (!success)
+		{
+			glGetShaderInfoLog(object, 512, NULL, infoLog);
+			fprintf(stderr, "ERROR::VERTEX::COMPILATION_FAILED Name: %s\n", name);
+		};
 	}
-	catch (std::ifstream::failure e) {
-		std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ " << path 
-			<< std::endl << e.what() << std::endl;
+	else {
+		glGetProgramiv(object, GL_LINK_STATUS, &success);
+		if (!success)
+		{
+			glGetProgramInfoLog(object, 1024, NULL, infoLog);
+			fprintf(stderr, "ERROR::Shader: LINK_TIME ERROR Name: %s\n-----------------------------------------\n",
+				name);
+		}
 	}
+}
 
-	return result;
+GLchar * get_all_string(const GLchar * path) {
+
+	FILE * file = fopen(path, "r");
+	size_t buf_size = 4096;
+	GLchar * buffer = (GLchar *)malloc(sizeof(GLchar) * buf_size);
+	if (!buffer)
+	{
+		fprintf(stderr, "out of memory\n");
+		return nullptr;
+	}
+	int c;
+	int counter = 0;
+	while ((c = fgetc(file)) != EOF) {
+		if (counter >= buf_size - 1) {
+			// ¶¯Ì¬À©Õ¹»º³åÇø
+			buf_size *= 2;
+			buffer = (GLchar *)realloc(buffer, sizeof(GLchar) * buf_size);
+			if (!buffer)
+			{
+				fprintf(stderr, "out of memory\n");
+				return nullptr;
+			}
+		}
+		buffer[counter++] = c;
+	}
+	// ×Ö·û´®½áÎ²
+	buffer[counter++] = '\0';
+	fclose(file);
+
+	return buffer;
 }
 
 /*
 	Compile shaders
 	@return The id of the shader program
 */
-void Shader::load_shader(const std::string& vShaderCode, const std::string& fShaderCode) {
+void Shader::load_shader(const GLchar * vShaderCode, const GLchar * fShaderCode) {
 
 	GLuint vertex, fragment;
 	GLint success;
 	GLchar infoLog[512];
-	const GLchar * vShaderText = vShaderCode.c_str();
-	const GLchar * fShaderText = fShaderCode.c_str();
+	const GLchar * vShaderText = vShaderCode;
+	const GLchar * fShaderText = fShaderCode;
 
 
 	// Creaate and compile vertex shader
@@ -47,12 +77,7 @@ void Shader::load_shader(const std::string& vShaderCode, const std::string& fSha
 	glCompileShader(vertex);
 
 	// print compile errors if any
-	glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-		std::cerr << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-	};
+	check_compile_Error(vertex, true, "Vertex Shader");
 
 	// Creaate and compile fragment shader
 	fragment = glCreateShader(GL_FRAGMENT_SHADER);
@@ -61,11 +86,7 @@ void Shader::load_shader(const std::string& vShaderCode, const std::string& fSha
 
 	// print compile errors if any
 	glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		glGetShaderInfoLog(fragment, 512, NULL, infoLog);
-		std::cerr << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-	};
+	check_compile_Error(vertex, true, "Fragment Shader");
 
 	// Create and link shader Program
 	this->ID = glCreateProgram();
@@ -74,12 +95,7 @@ void Shader::load_shader(const std::string& vShaderCode, const std::string& fSha
 	glLinkProgram(this->ID);
 
 	// Print linking errors if any
-	glGetProgramiv(this->ID, GL_LINK_STATUS, &success);
-	if (!success)
-	{
-		glGetProgramInfoLog(this->ID, 512, NULL, infoLog);
-		std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-	}
+	check_compile_Error(this->ID, false, "LINKING");
 
 	// Delete the shaders as they're linked into our program now and no longer necessery
 	glDeleteShader(vertex);
@@ -87,13 +103,9 @@ void Shader::load_shader(const std::string& vShaderCode, const std::string& fSha
 }
 
 
-Shader::Shader(const std::string & vertexPath, const std::string & fragmentPath)
+Shader::Shader(const GLchar * vertexPath, const GLchar * fragmentPath)
 {
-	std::string vShaderCode = get_all_string(vertexPath);
-	std::string fShaderCode = get_all_string(fragmentPath);
-
-	load_shader(vShaderCode, fShaderCode);
-
+	load_shader(get_all_string(vertexPath), get_all_string(fragmentPath));
 }
 
 
@@ -112,7 +124,13 @@ void Shader::setFloat(const std::string & name, GLfloat value) const
 	glUniform1f(glGetUniformLocation(this->ID, name.c_str()), value);
 }
 
-void Shader::setVec3(const std::string & name, float x, float y, float z) const
+void Shader::setVec3(const std::string & name, glm::vec3 value) const
 {
-	glUniform3f(glGetUniformLocation(this->ID, name.c_str()), x, y, z);
+	glUniform3f(glGetUniformLocation(this->ID, name.c_str()), value.x, value.y, value.z);
 }
+
+void Shader::setMat4(const std::string & name, glm::mat4 mat) const
+{
+	glUniformMatrix4fv(glGetUniformLocation(this->ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+}
+
