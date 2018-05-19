@@ -23,7 +23,7 @@ gltools.lib
 freeglut.lib
 glew32s.lib
 
-6.我目前发现的一些问题  mian里面要有
+6.我目前发现的一些问题  main里面要有
 GLenum err = glewInit();
 	if (GLEW_OK != err) {
 		fprintf(stderr, "GLEW Error: %s\n", glewGetErrorString(err));
